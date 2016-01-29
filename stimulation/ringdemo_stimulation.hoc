@@ -1,0 +1,52 @@
+/************************************************************
+'ringdemo' model code repository
+Written by Hines and Carnevale for JNM paper (downloaded from ModelDB #96444)
+Modified by Marianne Bezaire, marianne.bezaire@gmail.com, www.mariannebezaire.com
+Published and latest versions of this code are available online at:
+ModelDB: 
+Open Source Brain: 
+
+Main code file: ../main.hoc
+This file: Last updated on September 28, 2015
+
+This file defines one procedure to generate the pulse stimulation:
+1. connectSetStims: this procedure 
+
+************************************************************/
+
+
+// stim will be an artificial spiking cell that generates a "spike" event
+// that is delivered to the first cell in the net by ncstim
+// in order to initiate network spiking.
+// We won't bother including this "external stimulus source" or its NetCon
+// in the network's lists of cells or NetCons.
+objref stim, ncstim
+proc connectSetStims() {local jgid localobj cell, stimcell
+  // exit if the first cell in the net does not exist on this host
+  
+	for stimcelltype=0, numCellTypes-1 {
+		if (cellType[stimcelltype].is_art==1) {
+			stimgid=cellType[stimcelltype].cellStartGid
+			if (pc.gid_exists(stimgid)) {
+				stimcell = pc.gid2cell(stimgid)		
+				stimcell.number = 1
+				stimcell.start = 0
+				print "setting stimulating cell"
+			}
+			for celltype=0, numCellTypes-1 {
+				if (cellType[celltype].is_art==0) {
+					jgid=cellType[celltype].cellStartGid // Connect stimulating cell to first cell in ring network
+					if (pc.gid_exists(jgid)) {
+						cell = pc.gid2cell(jgid)
+						nc_appendo(stimgid, cell, stimcelltype, 0, 0.01, 1)  // original ring parallel example has 0 conduction delay, but this code can't handle that
+						cellType[stimcelltype].numCons.x[celltype] +=1
+						print "connecting stimulating cell ", stimgid, " to cell ", jgid
+					}
+				}
+			}
+		}
+	}
+}
+
+connectSetStims()
+

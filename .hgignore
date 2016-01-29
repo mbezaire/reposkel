@@ -1,0 +1,8 @@
+syntax:glob
+cellclamp_results/*
+results/*
+networkclamp_results/*
+*.c
+*.lo
+*.dll
+x86_64/*
